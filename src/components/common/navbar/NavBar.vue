@@ -21,10 +21,10 @@
   }
   .left,.right {
     width: 60px;
-    background-color: seashell;
+    /*background-color: seashell;*/
   }
   .center {
-    background-color: pink;
+    /*background-color: pink;*/
     flex: 1;
     text-align: center;
 
