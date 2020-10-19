@@ -27,7 +27,9 @@
     methods: {
       itemClick(index) {
         this.currentIndex = index
-      }
+        this.$emit('typeClick', index)
+      },
+
     }
   }
 </script>
@@ -36,19 +38,25 @@
   .tab-control {
     display: flex;
     text-align: center;
-    height: 38px;
-    line-height: 38px;
     font-size: 15px;
-
+    height: 40px;
+    line-height: 40px;
+    background-color: #fff;
   }
+
   .tab-control-item {
     flex: 1;
   }
-  .active span {
-    padding: 6px;
-    border-bottom: 3px solid var(--color-high-text);
+
+  .tab-control-item span {
+    padding: 5px;
   }
+
   .active {
     color: var(--color-high-text);
+  }
+
+  .active span {
+    border-bottom: 3px solid var(--color-tint);
   }
 </style>
