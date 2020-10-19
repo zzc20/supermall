@@ -1,6 +1,6 @@
 <template>
-  <div class="goods-item">
-    <img :src="goodsItem.show.img" alt="">
+  <div class="goods-item" >
+    <img :src="goodsItem.show.img" alt="" @load="imgLoad">
     <div class="goods-info">
       <p>{{goodsItem.title}}</p>
       <span class="price">{{goodsItem.price}}</span>
@@ -17,10 +17,17 @@
         type: Object,
         default() {
           return {}
+        }
+      }
+    },
+    methods: {
+      imgLoad() {
+        this.$bus.$emit('imgLoadFinishedItem');   //这儿必须是$emit负责发射出去的不是一个方法
+        // console.log('开心的一笔');
+      }
     }
-  }
-    }
-  }
+
+}
 </script>
 
 <style scoped>

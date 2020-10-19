@@ -116,7 +116,8 @@
     },
     mounted() {
       this.scroll = new Scroll(document.querySelector('.content'), {
-
+        probeType: 0 | 1 | 2 | 3,
+        pullUpLoad: true
       })
     }
 

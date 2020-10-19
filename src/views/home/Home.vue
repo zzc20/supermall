@@ -1,54 +1,24 @@
 <template>
   <div id="home">
     <NavBar class="home-nav"><div slot="center">购物车</div></NavBar>
-    <HomeComps :banners="banners"/>
-    <HomeRecommend :recommends="recommends"/>
-    <HomeFeature/>
-    <TabControl class="tab-control"
-                :titles="['流行', '最新', '精选']"
-                @typeClick="typeClick"/>
-    <GoodsList :goods="showGoods"/>
-
-
-
-    <ul>
-      <li>列表1</li>
-      <li>列表2</li>
-      <li>列表3</li>
-      <li>列表4</li>
-      <li>列表5</li>
-      <li>列表6</li>
-      <li>列表7</li>
-      <li>列表8</li>
-      <li>列表9</li>
-      <li>列表10</li>
-      <li>列表11</li>
-      <li>列表12</li>
-      <li>列表13</li>
-      <li>列表14</li>
-      <li>列表15</li>
-      <li>列表16</li>
-      <li>列表17</li>
-      <li>列表18</li>
-      <li>列表19</li>
-      <li>列表20</li>
-      <li>列表21</li>
-      <li>列表22</li>
-      <li>列表23</li>
-      <li>列表24</li>
-      <li>列表25</li>
-      <li>列表26</li>
-      <li>列表27</li>
-      <li>列表28</li>
-      <li>列表29</li>
-      <li>列表30</li>
-    </ul>
-
+    <BScroll class="bs-height"
+             ref="scroll"
+             :proto-type-num="3"
+             @scroll="contentScroll"
+             :isPull-up-load="true"
+             >
+      <!--             @pullingUp="loadMore"-->
+      <HomeComps :banners="banners"/>
+      <HomeRecommend :recommends="recommends"/>
+      <HomeFeature/>
+      <TabControl class="tab-control"
+                  :titles="['流行', '最新', '精选']"
+                  @typeClick="typeClick"/>
+      <GoodsList :goods="showGoods"/>
+    </BScroll>
+    <BackTop @click.native="backTop" ref="backTop" v-show="isBackTopShow"></BackTop>    <!--native监听原生事件对象 -->
 
   </div>
-
-
-
 
 </template>
 
@@ -56,10 +26,13 @@
   import NavBar from "components/common/navbar/NavBar";
   import TabControl from "components/content/tabcontrol/TabControl";
   import GoodsList from "components/content/goods/GoodsList";
+  import BScroll from "components/common/bscroll/BScroll"
+  import BackTop from "components/content/backtop/BackTop";
 
   import HomeComps from "./childcomps/HomeComps";
   import HomeRecommend from "./childcomps/HomeRecommend";
   import HomeFeature from "./childcomps/HomeFeature"
+
 
 
   import {getHomeMultidata, getHomeGoods} from "network/home"
@@ -69,6 +42,8 @@
       NavBar,
       TabControl,
       GoodsList,
+      BScroll,
+      BackTop,
       HomeComps,
       HomeRecommend,
       HomeFeature,
@@ -83,7 +58,8 @@
           'new': {page: 0, list: []},
           'sell': {page: 0, list: []},
         },
-        currentType: 'pop'
+        currentType: 'pop',
+        isBackTopShow: false
       }
     },
     computed: {
@@ -99,12 +75,19 @@
       this.getHomeGoods('sell')
       this.getHomeGoods('new')
     },
+    mounted() {
+      //3.监听item图片加载完成
+      this.$bus.$on('imgLoadFinishedItem', () => {
+        this.$refs.scroll.refresh();
+
+      })
+    },
     methods: {
       /**
        * 事件监听相关的代码
        */
 
-       typeClick(index) {
+      typeClick(index) {
          switch (index) {
            case 0:
              this.currentType = 'pop';
@@ -117,6 +100,21 @@
              break
          }
        },
+      backTop() {
+        // this.$refs.wrapper.scroll.scrollTo(0, 0)
+        console.log('点击');
+        // this.$refs.scroll.scroll.scrollTo(0, 0, 600)
+        //调用在scroll中封装好的scrollTo方法， 体现封装的思想
+        this.$refs.scroll.scrollTo(0, 0, 600)
+      },
+      contentScroll(position) {
+        // console.log(position);
+        this.isBackTopShow = -position.y > 1000
+      },
+      // loadMore() {
+      //   this.getHomeGoods(this.currentType)
+      //   this.$refs.scroll.scroll.refresh()
+      // },
 
       /**
        * 网络请求相关的代码
@@ -133,7 +131,9 @@
         getHomeGoods(type, page).then(res => {
           this.goods[type].list.push(...res.data.list)
           this.goods[type].page += 1
-          console.log(res);
+          this.$refs.scroll.finishPullUp()
+          // console.log(res);
+
 
         })
       }
@@ -143,7 +143,8 @@
 
 <style scoped>
   #home {
-    padding-top: 44px;
+    /*padding-top: 44px;*/
+    height: 100vh;    /* viewport height*/
   }
   .home-nav {
     background-color: var(--color-tint);
@@ -159,5 +160,19 @@
     position: sticky;
     background-color: #eee;
     top: 44px;
+  }
+  /*.bs-height {
+    !*height: 300px;*!
+    overflow: hidden;
+    margin-top: 44px;
+    height: calc(100% - 93px);
+  }*/
+  .bs-height {
+    overflow: hidden;
+    position: absolute;
+    top: 44px;
+    bottom: 49px;
+    left: 0;
+    right: 0;
   }
 </style>
