@@ -1,5 +1,5 @@
 <template>
-  <div class="goods-item" >
+  <div class="goods-item" @click="itemClick">
     <img :src="goodsItem.show.img" alt="" @load="imgLoad">
     <div class="goods-info">
       <p>{{goodsItem.title}}</p>
@@ -10,6 +10,8 @@
 </template>
 
 <script>
+
+
   export default {
     name: "GoodsItem",
     props:{
@@ -22,8 +24,19 @@
     },
     methods: {
       imgLoad() {
-        this.$bus.$emit('imgLoadFinishedItem');   //这儿必须是$emit负责发射出去的不是一个方法
-        // console.log('开心的一笔');
+        this.$bus.$emit('imgLoadFinishedItem');   //这儿必须是$emit负责发射出去的是一个方法
+      },
+      // itemClick() {
+      //   // console.log(this.goodsItem.iid);
+      //   this.$router.push('/detail/' + this.goodsItem.iid)
+      // }
+      itemClick() {
+        this.$router.push({
+          path: '/detail',
+          query: {
+            iid: this.goodsItem.iid
+          }
+        })
       }
     }
 
@@ -34,7 +47,6 @@
   .goods-item {
     padding-bottom: 40px;
     position: relative;
-
     width: 45%;
   }
 

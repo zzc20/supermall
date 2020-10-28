@@ -42,6 +42,7 @@
     height: 40px;
     line-height: 40px;
     background-color: #fff;
+    z-index: 1;
   }
 
   .tab-control-item {

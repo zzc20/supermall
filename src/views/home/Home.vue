@@ -1,19 +1,29 @@
 <template>
   <div id="home">
     <NavBar class="home-nav"><div slot="center">购物车</div></NavBar>
+
+    <TabControl class="tab-control"
+                :titles="['-pop-', '-new-', '-sell-']"
+                @typeClick="typeClick"
+                ref="tabControl01"
+                v-show="isTabFixed"/>
     <BScroll class="bs-height"
              ref="scroll"
              :proto-type-num="3"
              @scroll="contentScroll"
              :isPull-up-load="true"
+             @pullingUp="loadMore"
+             @swiperFinished="swiperFinished"
              >
-      <!--             @pullingUp="loadMore"-->
-      <HomeComps :banners="banners"/>
+      <!--  @pullingUp="loadMore"-->
+      <HomeSwiper :banners="banners"
+                  @swiperFinished="swiperFinished"/>
       <HomeRecommend :recommends="recommends"/>
       <HomeFeature/>
       <TabControl class="tab-control"
-                  :titles="['流行', '最新', '精选']"
-                  @typeClick="typeClick"/>
+                  :titles="['-pop-', '-new-', '-sell-']"
+                  @typeClick="typeClick"
+                  ref="tabControl02"/>
       <GoodsList :goods="showGoods"/>
     </BScroll>
     <BackTop @click.native="backTop" ref="backTop" v-show="isBackTopShow"></BackTop>    <!--native监听原生事件对象 -->
@@ -29,7 +39,7 @@
   import BScroll from "components/common/bscroll/BScroll"
   import BackTop from "components/content/backtop/BackTop";
 
-  import HomeComps from "./childcomps/HomeComps";
+  import HomeSwiper from "./childcomps/HomeSwiper";
   import HomeRecommend from "./childcomps/HomeRecommend";
   import HomeFeature from "./childcomps/HomeFeature"
 
@@ -44,7 +54,7 @@
       GoodsList,
       BScroll,
       BackTop,
-      HomeComps,
+      HomeSwiper,
       HomeRecommend,
       HomeFeature,
 
@@ -59,7 +69,10 @@
           'sell': {page: 0, list: []},
         },
         currentType: 'pop',
-        isBackTopShow: false
+        isBackTopShow: false,
+        saveY: null,
+        offsetTopNum: 0,
+        isTabFixed: false
       }
     },
     computed: {
@@ -79,14 +92,19 @@
       //3.监听item图片加载完成
       this.$bus.$on('imgLoadFinishedItem', () => {
         this.$refs.scroll.refresh();
-
       })
+    },
+    activated() {
+      this.$refs.scroll.scrollTo(0, this.saveY)
+      this.$refs.scroll.refresh()
+    },
+    deactivated() {
+      this.saveY = this.$refs.scroll.getCurrentY()
     },
     methods: {
       /**
        * 事件监听相关的代码
        */
-
       typeClick(index) {
          switch (index) {
            case 0:
@@ -99,6 +117,8 @@
              this.currentType = 'new';
              break
          }
+         this.$refs.tabControl01.currentIndex = index
+         this.$refs.tabControl02.currentIndex = index
        },
       backTop() {
         // this.$refs.wrapper.scroll.scrollTo(0, 0)
@@ -109,12 +129,15 @@
       },
       contentScroll(position) {
         // console.log(position);
+        //1. 当 y值大于1000显示backtop图标
         this.isBackTopShow = -position.y > 1000
+        //2. 当y值大于this.offsetTop的时候 tabControl吸顶
+        this.isTabFixed = -position.y > this.offsetTopNum
       },
-      // loadMore() {
-      //   this.getHomeGoods(this.currentType)
-      //   this.$refs.scroll.scroll.refresh()
-      // },
+      loadMore() {
+        this.getHomeGoods(this.currentType)
+        this.$refs.scroll.scroll.refresh()
+      },
 
       /**
        * 网络请求相关的代码
@@ -132,10 +155,16 @@
           this.goods[type].list.push(...res.data.list)
           this.goods[type].page += 1
           this.$refs.scroll.finishPullUp()
-          // console.log(res);
-
+          // console.log(res.data);
 
         })
+      },
+      swiperFinished() {
+        // this.$refs.scroll.refresh();
+        // 4.获取元素的offsetTop    所有的组件都有这个元素属性$el
+        this.offsetTopNum = this.$refs.tabControl02.$el.offsetTop
+
+        // console.log(this.$refs.tabControl01.$el.offsetTop);
       }
     }
   }

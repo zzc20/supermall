@@ -49,15 +49,17 @@
     },
     methods: {
       scrollTo(x, y, time) {
-        this.scroll && this.scroll.scrollTo && this.scroll.scrollTo(0, 0, 600)
+        return this.scroll && this.scroll.scrollTo(0, 0, 600)
       },
       finishPullUp() {
-        this.scroll && this.scroll.finishPullUp()
+        return this.scroll && this.scroll.finishPullUp()
       },
       refresh() {
         // console.log('refresh');  //已经测试成功
-        this.scroll && this.scroll.refresh()
-
+        return this.scroll && this.scroll.refresh()
+      },
+      getCurrentY() {
+        return this.scroll.y ? this.scroll.y : 0
       }
     }
   }
